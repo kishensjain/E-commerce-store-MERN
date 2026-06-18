@@ -5,7 +5,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-} from "../controllers/productController.js";
+} from "../controllers/product.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import { admin } from "../middlewares/admin.middleware.js";
 import multer from "multer";
