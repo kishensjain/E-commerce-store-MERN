@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const productSchema = mongoose.Schema(
+const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true },
@@ -20,8 +20,8 @@ const productSchema = mongoose.Schema(
       ref: "Category",
       required: true,
     },
-    imageUrl: { type: String, required: true },
-    ratings: { type: Number, default: 0 },
+    imageUrl: { type: String, required: true, trim: true },
+    ratings: { type: Number, default: 0, min: 0, max: 5 },
     numReviews: { type: Number, default: 0 },
   },
   { timestamps: true },

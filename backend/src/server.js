@@ -1,11 +1,12 @@
 // packages
 import express from "express";
 import dotenv from "dotenv";
-import cookieParser from "cookie-parser"
+import cookieParser from "cookie-parser";
 
 // routes/config
 import connectDB from "./config/db.js";
-import authRoutes from "./routes/auth.routes.js"
+import authRoutes from "./routes/auth.routes.js";
+import productRoutes from "./routes/product.routes.js";
 
 dotenv.config();
 
@@ -18,7 +19,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use('/api/auth', authRoutes)
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
 
 app.get("/", (_, res) => {
   res.send("API is running");
