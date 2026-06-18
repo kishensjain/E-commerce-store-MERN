@@ -21,6 +21,7 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
     imageUrl: { type: String, required: true, trim: true },
+    imagePublicId: { type: String, required: true },
     ratings: { type: Number, default: 0, min: 0, max: 5 },
     numReviews: { type: Number, default: 0 },
   },
