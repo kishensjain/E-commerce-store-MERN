@@ -1,14 +1,14 @@
 // packages
 import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
 import cookieParser from "cookie-parser";
+
 
 // routes/config
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import productRoutes from "./routes/product.routes.js";
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5002;
