@@ -31,17 +31,24 @@ export const createProduct = async (req, res) => {
   try {
     const { name, description, price, category, stock } = req.body;
 
-    let imageUrl = "";
-    let imagePublicId = "";
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path);
-      imageUrl = result.secure_url;
-      imagePublicId = result.public_id;
-      await fs.promises.unlink(req.file.path);
-    } else {
+    if (!req.file) {
       return res.status(400).json({
         message: "Product image is required",
       });
+    }
+
+    let imageUrl = "";
+    let imagePublicId = "";
+    try {
+      const result = await cloudinary.uploader.upload(req.file.path);
+      imageUrl = result.secure_url;
+      imagePublicId = result.public_id;
+    } finally {
+      try {
+        await fs.promises.unlink(req.file.path);
+      } catch (error) {
+        console.error("Temp file cleanup failed:", error);
+      }
     }
 
     const product = new Product({
@@ -78,12 +85,18 @@ export const updateProduct = async (req, res) => {
         await cloudinary.uploader.destroy(product.imagePublicId);
 
         // Upload new image
-        const result = await cloudinary.uploader.upload(req.file.path);
+        try {
+          const result = await cloudinary.uploader.upload(req.file.path);
 
-        product.imageUrl = result.secure_url;
-        product.imagePublicId = result.public_id;
-
-        await fs.promises.unlink(req.file.path);
+          product.imageUrl = result.secure_url;
+          product.imagePublicId = result.public_id;
+        } finally {
+          try {
+            await fs.promises.unlink(req.file.path);
+          } catch (error) {
+            console.error("Temp file cleanup failed:", error);
+          }
+        }
       }
 
       const updatedProduct = await product.save();
