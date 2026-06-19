@@ -13,8 +13,9 @@ import { admin } from "../middlewares/admin.middleware.js";
 const router = express.Router();
 
 router.route("/").post(protect, placeOrder).get(protect, admin, getOrders);
-router.route("/myorders").get(protect, getMyOrders);
+router.route("/myOrders").get(protect, getMyOrders);
 router.route("/:id/status").put(protect, admin, updateOrderStatus);
-router.route("/:id").get(protect, getOrderById).delete(protect, admin, cancelOrder);
+router.route("/:id").get(protect, getOrderById);
+router.route("/:id/cancel").put(protect, cancelOrder);
 
 export default router;
