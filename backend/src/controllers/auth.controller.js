@@ -117,7 +117,7 @@ export const registerUser = async (req, res) => {
         email: user.email,
         subject: "Verify Your Email",
         message: `
-          <h2>Welcome to ShopNest!</h2>
+          <h2>Welcome to Aurevia!</h2>
           <p>Your verification OTP is:</p>
           <h1>${otp}</h1>
           <p>This OTP will expire in 10 minutes.</p>
