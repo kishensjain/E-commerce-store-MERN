@@ -1,5 +1,17 @@
 import Order from "../models/order.model.js";
 import { sendEmail } from "../utils/sendEmail.js";
+import Product from "../models/product.model.js";
+
+const restoreStock = async (order) => {
+  for (const item of order.items) {
+    const product = await Product.findById(item.productId);
+
+    if (product) {
+      product.stock += item.qty;
+      await product.save();
+    }
+  }
+};
 
 export const placeOrder = async (req, res) => {
   try {
@@ -9,18 +21,43 @@ export const placeOrder = async (req, res) => {
       return res.status(400).json({ message: "No order items" });
     }
 
-    const totalAmount = items.reduce(
-      (acc, item) => acc + item.price * item.qty,
-      0,
-    );
+    const orderItems = [];
+    let totalAmount = 0;
+
+    for (const item of items) {
+      const product = await Product.findById(item.productId);
+
+      if (!product) {
+        return res.status(404).json({
+          message: `Product not found`,
+        });
+      }
+
+      if (product.stock < item.qty) {
+        return res.status(400).json({
+          message: `${product.name} is out of stock`,
+        });
+      }
+
+      product.stock -= item.qty;
+      await product.save();
+
+      orderItems.push({
+        productId: product._id,
+        name: product.name,
+        price: product.price,
+        qty: item.qty,
+      });
+
+      totalAmount += product.price * item.qty;
+    }
 
     const order = new Order({
       userId: req.user._id,
-      items,
+      items: orderItems,
       totalAmount,
       address,
       paymentId,
-      status: "Pending",
     });
 
     const createdOrder = await order.save();
@@ -108,6 +145,10 @@ export const updateOrderStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid status" });
     }
 
+    if (req.body.status === "Cancelled" && order.status !== "Cancelled") {
+      await restoreStock(order);
+    }
+
     order.status = req.body.status;
 
     const updatedOrder = await order.save();
@@ -131,13 +172,18 @@ export const cancelOrder = async (req, res) => {
     }
 
     if (order.status !== "Pending") {
-      return res.status(400).json({ message: "Order cannot be cancelled" });
+      return res.status(400).json({
+        message: "Only pending orders can be cancelled",
+      });
     }
 
-    order.status = "Cancelled";
-    await order.save();
+    await restoreStock(order);
 
-    res.status(200).json(order);
+    order.status = "Cancelled";
+
+    const updatedOrder = await order.save();
+
+    res.status(200).json(updatedOrder);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
