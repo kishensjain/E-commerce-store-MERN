@@ -1,7 +1,7 @@
 import express from "express";
-import getAdminStats from "../controllers/analyticsController.js";
-import protect from "../middleware/authMiddleware.js";
-import admin from "../middleware/adminMiddleware.js";
+import {getAdminStats} from "../controllers/analytics.controller.js";
+import protect from "../middlewares/auth.middleware.js";
+import admin from "../middlewares/admin.middleware.js";
 
 const router = express.Router();
 
