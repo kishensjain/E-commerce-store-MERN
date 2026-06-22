@@ -6,7 +6,7 @@ import {
 
 const router = express.Router();
 
-router.post("/order", createOrder);
-router.post("/verify", verifyPayment);
+router.post("/create-order", createOrder);
+router.post("/verify-payment", verifyPayment);
 
 export default router;
