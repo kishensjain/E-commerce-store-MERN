@@ -66,8 +66,23 @@ export const getProducts = async (req, res) => {
         sortOption.createdAt = -1;
     }
 
-    const products = await Product.find({}).populate("category", "name");
-    res.json(products);
+    // Pagination
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const totalProducts = await Product.countDocuments(filter);
+
+    const products = await Product.find(filter)
+      .populate("category", "name")
+      .sort(sortOption)
+      .skip(skip)
+      .limit(Number(limit));
+
+    res.json({
+      products,
+      currentPage: Number(page),
+      totalPages: Math.ceil(totalProducts / Number(limit)),
+      totalProducts,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
