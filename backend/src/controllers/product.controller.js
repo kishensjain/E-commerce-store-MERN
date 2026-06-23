@@ -5,6 +5,67 @@ import Category from "../models/category.model.js";
 
 export const getProducts = async (req, res) => {
   try {
+    const {
+      search,
+      category,
+      minPrice,
+      maxPrice,
+      sort,
+      page = 1,
+      limit = 12,
+    } = req.query;
+    const filter = {};
+
+    // Search by product name
+    if (search) {
+      filter.name = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    // Filter by category
+    if (category) {
+      filter.category = category;
+    }
+
+    // Filter by price range
+    if (minPrice || maxPrice) {
+      filter.price = {};
+
+      if (minPrice) {
+        filter.price.$gte = Number(minPrice);
+      }
+
+      if (maxPrice) {
+        filter.price.$lte = Number(maxPrice);
+      }
+    }
+
+    // Sorting
+    let sortOption = {};
+
+    switch (sort) {
+      case "price_asc":
+        sortOption.price = 1;
+        break;
+
+      case "price_desc":
+        sortOption.price = -1;
+        break;
+
+      case "newest":
+        sortOption.createdAt = -1;
+        break;
+
+      case "oldest":
+        sortOption.createdAt = 1;
+        break;
+
+      default:
+        sortOption.createdAt = -1;
+    }
+
     const products = await Product.find({}).populate("category", "name");
     res.json(products);
   } catch (error) {
