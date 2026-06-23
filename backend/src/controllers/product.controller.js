@@ -19,8 +19,9 @@ export const getProducts = async (req, res) => {
     // Search by product name
     if (search) {
       filter.name = {
-        $regex: search,
-        $options: "i",
+        // This regex is substring matching, not word matching.
+        $regex: search, // $regex tells MongoDB to perform a pattern match.
+        $options: "i", // "i" is for case-insensitive
       };
     }
 
