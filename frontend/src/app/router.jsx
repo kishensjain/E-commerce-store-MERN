@@ -1,3 +1,4 @@
+// createBrowserRouter() creates a router object that knows all the routes in your application.
 import { createBrowserRouter } from "react-router";
 
 import AdminLayout from "@/layouts/AdminLayout";
@@ -23,7 +24,7 @@ export const router = createBrowserRouter([
     element: <MainLayout />,
     children: [
       {
-        index: true,
+        index: true, // this is the default route(path: "/")
         element: <HomePage />,
       },
       {
