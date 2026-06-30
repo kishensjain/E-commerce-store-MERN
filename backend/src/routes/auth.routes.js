@@ -4,7 +4,8 @@ import {
   loginUser,
   logoutUser,
   getUsers,
-  verifyOtp
+  verifyOtp,
+  currentUser
 } from "../controllers/auth.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import { admin } from "../middlewares/admin.middleware.js";
@@ -16,5 +17,6 @@ router.post("/login", loginUser);
 router.post("/logout", logoutUser);
 router.get("/users", protect, admin, getUsers);
 router.post("/verify-otp", verifyOtp);
+router.get("/me", protect, currentUser);
 
 export default router;

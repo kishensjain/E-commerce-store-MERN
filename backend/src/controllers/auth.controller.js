@@ -215,3 +215,14 @@ export const logoutUser = async (req, res) => {
     message: "Logged out successfully",
   });
 };
+
+export const currentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
