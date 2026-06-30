@@ -2,10 +2,7 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/sendEmail.js";
-
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
-};
+import generateToken from "../utils/generateToken.js";
 
 export const verifyOtp = async (req, res) => {
   try {
@@ -59,16 +56,14 @@ export const verifyOtp = async (req, res) => {
     await user.save();
 
     return res.status(200).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      token: generateToken(user._id),
+      success: true,
+      message: "Email verified successfully",
     });
   } catch (error) {
     console.error(error);
 
     return res.status(500).json({
+      success: false,
       message: "Server error",
     });
   }
@@ -128,8 +123,11 @@ export const registerUser = async (req, res) => {
     }
 
     return res.status(201).json({
+      success: true,
       message: "Registration successful. Please check your email for the OTP.",
-      email: user.email,
+      data: {
+        email: user.email,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -141,6 +139,7 @@ export const registerUser = async (req, res) => {
     }
 
     return res.status(500).json({
+      success: false,
       message: "Server error",
     });
   }
@@ -178,17 +177,22 @@ export const loginUser = async (req, res) => {
       });
     }
 
+    generateToken(res, user._id);
+
     return res.status(200).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      token: generateToken(user._id),
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error(error);
 
     return res.status(500).json({
+      success: false,
       message: "Server error",
     });
   }
@@ -200,18 +204,29 @@ export const getUsers = async (req, res) => {
       createdAt: -1,
     });
 
-    return res.status(200).json(users);
+    return res.status(200).json({
+      success: true,
+      data: users,
+    });
   } catch (error) {
     console.error(error);
 
     return res.status(500).json({
+      success: false,
       message: "Server error",
     });
   }
 };
 
 export const logoutUser = async (req, res) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    expires: new Date(0),
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
   return res.status(200).json({
+    success: true,
     message: "Logged out successfully",
   });
 };
@@ -220,9 +235,12 @@ export const currentUser = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select("-password");
 
-    res.status(200).json(user);
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ success: false,message: "Server error" });
   }
 };
